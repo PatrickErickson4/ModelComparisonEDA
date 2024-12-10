@@ -4,7 +4,6 @@ author: "Patrick Erickson, Aiden Shindel, Jordan Brophy"
 format: pdf
 editor: visual
 csl: mla.csl
-bibliography: references.bib
 ---
 
 # Logistic Regression Analysis for Basketball Teams: Can we Create a Robust and Parsimonious Model to Predict if one Basketball Team will Win over Another?
@@ -41,7 +40,7 @@ library(ggplot2)
 library(dplyr)
 
 basketball.data <- read.csv("games.csv")
-head(data,5)
+head(basketball.data,5)
 ```
 
 ## Data Cleaning for Interpretability
@@ -52,10 +51,9 @@ The nature of our model requires that we have valid data points to be able to pe
 
 ### Solving interpretability issues
 
-Upon closer inspection we have found offending points that will ultimately statistically skew our data, as well as possible null values that may break our regression models and calculations in the latter processes of our analysis. This is especially within the percentage values, where we see some of the values being reported as 6300% which is obviously not feasible for the scope of these variables. Additionally, we can also see that it is extremely hard to determine what each statistic is based on their respective abbreviations. As a result, we need to go through a four step process to clean and ready the data for further analysis and testing:
+Upon closer inspection we have found offending points that will ultimately statistically skew our data, as well as possible null values that may break our regression models and calculations in the latter processes of our analysis. Additionally, we can also see that it is extremely hard to determine what each statistic is based on their respective abbreviations. As a result, we need to go through a four step process to clean and ready the data for further analysis and testing:
 
 -   Reject any null values that may appear in the data set, since we can not interpret them.
--   Reject any values that don't make sense (percentages over 100%, type mismatches)
 -   Reject any negative values from the data
 -   Rename every variable within the basketball data set to match that of the subscripted value beneath the name of the column on the website for better readability
 
@@ -67,18 +65,59 @@ We can utilize the following R code to accomplish these tasks:
 basketball.data <- na.omit(basketball.data)
 
 #TODO: Use visual made to refer to the data names
-# underneath the columns and create a pipeline that renames ALL 40 variables to the ones mentioned in the Kaggle Dataset
 
-#TODO: From percentages, remove any values > 1.0
+# Rename specific columns
+basketball.data <- basketball.data %>%
+  rename(
+    game_decision = w_l,
+    points = pts,
+    opp_points = opp_pts,
+    field_goals = fg,
+    field_goal_attempts = fga,
+    field_goal_percentage = fg_per,
+    `3pointers` = `X3p`,
+    `3pointer_attempts` = `X3pa`,
+    `3pointer_percentage` = `X3p_per`,
+    free_throws = ft,
+    free_throw_attempts = fta,
+    free_throw_percentage = ft_per,
+    offensive_rebounds = orb,
+    total_rebounds = trb,
+    assists = ast,
+    steals = stl,
+    blocks = blk,
+    turnovers = tov,
+    personal_fouls = pf,
+    opp_fieldgoals = opp_fg,
+    opp_fieldgoal_attempts = opp_fga,
+    opp_fieldgoal_percentage = opp_fg_per,
+    `opp_3pointers` = `opp_3p`,
+    `opp_3pointer_attempts`= `opp_3pa`,
+    `opp_3pointer_percentatge` = `opp_3p_per`,
+    opp_freethrows = opp_ft,
+    opp_freethrow_attempts = opp_ft_per,
+    opp_offensive_rebounds = opp_orb,
+    opp_assists = opp_ast,
+    opp_steals = opp_stl,
+    opp_blocks = opp_blk,
+    opp_turnovers = opp_tov,
+    opp_personal_fouls = opp_pf
+  )
 
-#TODO: From all number values, remove numbers < 0
+# From all number values, remove numbers < 0
+basketball.data <- basketball.data %>%
+  filter(if_all(everything(), ~ . >= 0))
 
 ```
 
-### Readying the data for logistic regression
+### Removal of poor variables
+
+We can see that this is especially within the percentage values, where we see some of the values being reported as 6300% which is obviously not feasible for the scope of these variables. Furthermore, since the idea behind the values of the percentages are some proportional combination of 2 other variables within the data set. This will cause issues of co-linearity within our regression model, where $\bar{\theta}_{MLE}$ can not be calculated due to the fact that the design matrix of the logistic regression function will ultimately become singular. Our mitigation strategy is to therefore remove these co-linear variables, as we can also calculate them in the future if need be based on our
+
+### Readying the data for logistic regression analysis
 
 ```{r}
-# 
+
 ```
 
 ## Can we predict whether a team will win or not based on the given data?
