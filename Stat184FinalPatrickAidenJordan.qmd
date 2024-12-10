@@ -63,16 +63,15 @@ We can utilize the following R code to accomplish these tasks:
 
 ```{r}
 
-#Aiden, whatever you do you can do here. Please put it in a separate R Script, and we'll figure out commit stuff after meeting up together tomorrow, whenever you're free
 #remove any null values
 basketball.data <- na.omit(basketball.data)
 
-#TODO: Aiden: Use visual made to refer to the data names
+#TODO: Use visual made to refer to the data names
 # underneath the columns and create a pipeline that renames ALL 40 variables to the ones mentioned in the Kaggle Dataset
 
-#TODO: Aiden: From percentages, remove any values > 1.0
+#TODO: From percentages, remove any values > 1.0
 
-#TODO: Aiden: From all number values, remove numbers < 0
+#TODO: From all number values, remove numbers < 0
 
 ```
 
