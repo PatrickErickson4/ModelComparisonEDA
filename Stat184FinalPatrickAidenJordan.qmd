@@ -43,7 +43,7 @@ basketball.data <- read.csv("games.csv")
 head(basketball.data,5)
 ```
 
-## Data Cleaning for Interpretability
+## Readying the data for logistic regression analysis
 
 The nature of our model requires that we have valid data points to be able to perform proper regression testing (you are not able to plot null values). Due to the fact that the data set is sufficiently large, it is very likely that the data wouldn't be interpretable for the purposes mentioned above. We will view the following data to ensure the feasibility of our data set. The Kaggle data set gives us some insight about every single variable within the data set. We will refer to them here:
 
@@ -56,18 +56,63 @@ Upon closer inspection we have found offending points that will ultimately stati
 -   Reject any null values that may appear in the data set, since we can not interpret them.
 -   Reject any negative values from the data
 -   Rename every variable within the basketball data set to match that of the subscripted value beneath the name of the column on the website for better readability
+-   Prune any case that is not a win or loss
 
 We can utilize the following R code to accomplish these tasks:
 
+### Removal of poor/colinear variables
+
+We can see that this is especially within the percentage values, where we see some of the values being reported as 6300% which is obviously not feasible for the scope of these variables. Furthermore, since the idea behind the values of the percentages are some proportional combination of 2 other variables within the data set. This will cause issues of co-linearity within our regression model, where $\bar{\theta}_{MLE}$ can not be calculated due to the fact that the design matrix of the logistic regression function will ultimately become singular. Done with AIC
+
+### Ensuring our testing variable is binary
+
+When reviewing the game decision variable, we will notice that there are some offending values. We will therefore remove any cases where the indicator for a winning or losing team is not either "W" or "L".
+
+Reject:
+
 ```{r}
 
-#remove any null values
-basketball.data <- na.omit(basketball.data)
+cor_matrix <- cor(basketball.data %>% select(where(is.numeric)))
 
-#TODO: Use visual made to refer to the data names
+cor_data <- as.data.frame(as.table(cor_matrix))
+colnames(cor_data) <- c("Var1", "Var2", "Correlation")
+
+cor_data <- cor_data %>%
+  mutate(Color = ifelse(abs(Correlation) >= 0.95, "black", NA))
+
+ggplot(cor_data, aes(Var1, Var2, fill = Correlation)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+  geom_tile(data = cor_data %>% filter(!is.na(Color)), aes(Var1, Var2), fill = "black") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "Correlation Heatmap of Random Cases",
+       x = "Variable 1",
+       y = "Variable 2",
+       fill = "Correlation")
+
+
+
+
+```
+
+-## Can we predict whether a team will win or not based on the given data?
+
+Determining whether or not the team
+
+```{r}
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+
+basketball_data <- read.csv("games.csv")
+
+#remove any null values
+basketball_data <- na.omit(basketball_data)
+
 
 # Rename specific columns
-basketball.data <- basketball.data %>%
+basketball_data <- basketball_data %>%
   rename(
     game_decision = w_l,
     points = pts,
@@ -105,21 +150,215 @@ basketball.data <- basketball.data %>%
   )
 
 # From all number values, remove numbers < 0
-basketball.data <- basketball.data %>%
+basketball_data <- basketball_data %>%
   filter(if_all(everything(), ~ . >= 0))
+
+
+# Make it so that the opposing team values are removed, and categorical variables that can't be 1-hot encoded are removed
+basketball_data <- basketball_data %>%
+   # Step 1: Drop variables containing percentages
+#  select(-matches("percentage")) %>%
+  
+  # Step 2: Drop specific variables: game_num, date, and any column containing "opp"
+  select(-game_num, -date, -contains("opp")) %>%
+  
+  # Step 3: Filter rows where site contains valid values and one-hot encode site
+  filter(site %in% c("Home", "Away", "Neutral")) %>%
+  mutate(
+    Home = ifelse(site == "Home", 1, 0),
+    Away = ifelse(site == "Away", 1, 0),
+    Neutral = ifelse(site == "Neutral", 1, 0)
+  ) %>%
+  select(-site)  # Drop the original site column
+
+
+#cor_matrix <- cor(lions %>% select(where(is.numeric)))
+#
+#cor_data <- as.data.frame(as.table(cor_matrix))
+#colnames(cor_data) <- c("Var1", "Var2", "Correlation")
+#
+#cor_data <- cor_data %>%
+#  mutate(Color = ifelse(abs(Correlation) >= 0.95, "black", NA))
+#
+#p <- ggplot(cor_data, aes(Var1, Var2, fill = Correlation)) +
+#  geom_tile(color = "white") +
+#  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
+#  geom_tile(data = cor_data %>% filter(!is.na(Color)), aes(Var1, Var2), fill = "black") +
+#  theme_minimal() +
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+#  labs(title = "Correlation Heatmap of Random Cases",
+#       x = "Variable 1",
+#       y = "Variable 2",
+#       fill = "Correlation")
+#p
+
+fullmodel <- basketball_data %>%
+  select(-team_name) %>%
+  mutate(
+    game_decision = ifelse(game_decision == "W", 1, 0)
+  )
+fullmodel <- fullmodel %>%
+  mutate(across(everything(), ~ as.numeric(as.character(.))))
+regressionmodel <- na.omit(regressionmodel)
+
+
+# Set a seed for reproducibility
+set.seed(112911)
+
+# Create an index for the training set (80% of the rows)
+train_index <- sample(1:nrow(fullmodel), 0.8 * nrow(fullmodel))
+
+# Split the data
+trainingmodel <- fullmodel[train_index, ]  # 80% training data
+
+testset <- fullmodel[-train_index, ] #20%
 
 ```
 
-### Removal of poor variables
+```{r}
+game_decision <- trainingmodel$game_decision
+points <- trainingmodel$points
+field_goals<- trainingmodel$field_goals
+field_goal_attempts<- trainingmodel$field_goal_attempts
+field_goal_percentage<- trainingmodel$field_goal_percentage
+`3pointers`<- trainingmodel$`3pointers`
+`3pointer_attempts`<- trainingmodel$`3pointer_attempts`
+`3pointer_percentage`<- trainingmodel$`3pointer_percentage`
+free_throws<- trainingmodel$free_throws
+free_throw_attempts<- trainingmodel$free_throw_attempts
+free_throw_percentage<- trainingmodel$free_throw_percentage
+offensive_rebounds<- trainingmodel$offensive_rebounds
+total_rebounds<- trainingmodel$total_rebounds
+assists<- trainingmodel$assists
+steals<- trainingmodel$steals
+blocks<- trainingmodel$blocks
+turnovers<- trainingmodel$turnovers
+personal_fouls<- trainingmodel$personal_fouls
+Home<- trainingmodel$Home
+Away<- trainingmodel$Away
+Neutral<- trainingmodel$Neutral
 
-We can see that this is especially within the percentage values, where we see some of the values being reported as 6300% which is obviously not feasible for the scope of these variables. Furthermore, since the idea behind the values of the percentages are some proportional combination of 2 other variables within the data set. This will cause issues of co-linearity within our regression model, where $\bar{\theta}_{MLE}$ can not be calculated due to the fact that the design matrix of the logistic regression function will ultimately become singular. Our mitigation strategy is to therefore remove these co-linear variables, as we can also calculate them in the future if need be based on our
 
-### Readying the data for logistic regression analysis
+
+naivemodel <- glm(game_decision ~ 
+             points +
+             field_goals +
+             field_goal_attempts +
+             field_goal_percentage +
+             `3pointers` +
+             `3pointer_attempts` +
+             `3pointer_percentage`+
+             free_throws+
+             free_throw_attempts+
+             free_throw_percentage+
+             offensive_rebounds+
+             total_rebounds+
+             assists+
+             steals+
+             blocks+
+             turnovers+
+             personal_fouls+
+             Home+
+             Away+
+             Neutral,
+           data = trainingmodel,
+           family = binomial
+)
+
+summary(res)
+parsimoniousmodel <- step(res, k=log(nrow(regressionmodel)))
+summary(parsimoniousmodel)
+```
 
 ```{r}
 
+# Load necessary libraries
+library(pROC)
+library(ggplot2)
+
+# Predict probabilities for the test set
+naivemodel_probs <- predict(naivemodel, newdata = testset, type = "response")
+parsimonious_probs <- predict(parsimoniousmodel, newdata = testset, type = "response")
+
+# Compute AUC values
+naivemodel_auc <- auc(testset$game_decision, naivemodel_probs)
+parsimonious_auc <- auc(testset$game_decision, parsimonious_probs)
+
+# Generate ROC curves
+naivemodel_roc <- roc(testset$game_decision, naivemodel_probs)
+parsimonious_roc <- roc(testset$game_decision, parsimonious_probs)
+
+# Create ROC curve data for ggplot
+naivemodel_roc_df <- data.frame(
+  FPR = 1 - naivemodel_roc$specificities,
+  TPR = naivemodel_roc$sensitivities
+)
+
+parsimonious_roc_df <- data.frame(
+  FPR = 1 - parsimonious_roc$specificities,
+  TPR = parsimonious_roc$sensitivities
+)
+
+# Plot ROC curve for Full Model (res)
+roc_plot_naivemodel <- ggplot(naivemodel_roc_df, aes(x = FPR, y = TPR)) +
+  geom_line(color = "blue", size = 1.2) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
+  labs(
+    title = "ROC Curve for Full Model",
+    x = "False Positive Rate (1 - Specificity)",
+    y = "True Positive Rate (Sensitivity)"
+  ) +
+  theme_minimal() +
+  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(res_auc, 3)), size = 5, color = "blue")
+
+# Plot ROC curve for Parsimonious Model
+roc_plot_parsimonious <- ggplot(parsimonious_roc_df, aes(x = FPR, y = TPR)) +
+  geom_line(color = "red", size = 1.2) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
+  labs(
+    title = "ROC Curve for Parsimonious Model",
+    x = "False Positive Rate (1 - Specificity)",
+    y = "True Positive Rate (Sensitivity)"
+  ) +
+  theme_minimal() +
+  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(parsimonious_auc, 3)), size = 5, color = "red")
+
+# Print the plots
+print(roc_plot_naivemodel)
+print(roc_plot_parsimonious)
 ```
 
-## Can we predict whether a team will win or not based on the given data?
+```{r}
 
-Determining whether or not the team
+randomvarregression <- glm(game_decision ~ 
+             Home+
+             points+
+             Away,
+             data = trainingmodel,
+             family = binomial)
+  
+summary(randomvarregression)
+```
+
+```{r}
+random_probs <- predict(randomvarregression, newdata = testset, type = "response")
+random_auc <- auc(testset$game_decision, random_probs)
+random_roc <- roc(testset$game_decision, random_probs)
+# Create ROC curve data for ggplot
+random_roc_df <- data.frame(
+  FPR = 1 - random_roc$specificities,
+  TPR = random_roc$sensitivities
+)
+# Plot ROC curve for Full Model (res)
+roc_plot_random <- ggplot(random_roc_df, aes(x = FPR, y = TPR)) +
+  geom_line(color = "blue", size = 1.2) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
+  labs(
+    title = "ROC Curve for Full Model",
+    x = "False Positive Rate (1 - Specificity)",
+    y = "True Positive Rate (Sensitivity)"
+  ) +
+  theme_minimal() +
+  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(random_auc, 3)), size = 5, color = "blue")
+print(roc_plot_random)
+```
