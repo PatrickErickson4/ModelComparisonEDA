@@ -172,26 +172,6 @@ basketball_data <- basketball_data %>%
   select(-site)  # Drop the original site column
 
 
-#cor_matrix <- cor(lions %>% select(where(is.numeric)))
-#
-#cor_data <- as.data.frame(as.table(cor_matrix))
-#colnames(cor_data) <- c("Var1", "Var2", "Correlation")
-#
-#cor_data <- cor_data %>%
-#  mutate(Color = ifelse(abs(Correlation) >= 0.95, "black", NA))
-#
-#p <- ggplot(cor_data, aes(Var1, Var2, fill = Correlation)) +
-#  geom_tile(color = "white") +
-#  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
-#  geom_tile(data = cor_data %>% filter(!is.na(Color)), aes(Var1, Var2), fill = "black") +
-#  theme_minimal() +
-#  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-#  labs(title = "Correlation Heatmap of Random Cases",
-#       x = "Variable 1",
-#       y = "Variable 2",
-#       fill = "Correlation")
-#p
-
 fullmodel <- basketball_data %>%
   select(-team_name) %>%
   mutate(
@@ -344,12 +324,12 @@ summary(randomvarregression)
 random_probs <- predict(randomvarregression, newdata = testset, type = "response")
 random_auc <- auc(testset$game_decision, random_probs)
 random_roc <- roc(testset$game_decision, random_probs)
-# Create ROC curve data for ggplot
+
 random_roc_df <- data.frame(
   FPR = 1 - random_roc$specificities,
   TPR = random_roc$sensitivities
 )
-# Plot ROC curve for Full Model (res)
+
 roc_plot_random <- ggplot(random_roc_df, aes(x = FPR, y = TPR)) +
   geom_line(color = "blue", size = 1.2) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
