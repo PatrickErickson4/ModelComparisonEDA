@@ -1,0 +1,263 @@
+Call:
+glm(formula = game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointers` + `3pointer_attempts` + 
+    `3pointer_percentage` + free_throws + free_throw_attempts + 
+    free_throw_percentage + offensive_rebounds + total_rebounds + 
+    assists + steals + blocks + turnovers + personal_fouls + 
+    Home + Away + Neutral, family = binomial, data = trainingmodel)
+
+Coefficients: (1 not defined because of singularities)
+                       Estimate Std. Error z value Pr(>|z|)    
+(Intercept)           -2.024698   0.707391  -2.862  0.00421 ** 
+points                 1.884644   1.920567   0.981  0.32645    
+field_goals           -3.462565   3.841264  -0.901  0.36737    
+field_goal_attempts   -0.314953   0.012904 -24.407  < 2e-16 ***
+field_goal_percentage  5.099355   1.556196   3.277  0.00105 ** 
+`3pointers`           -1.687535   1.920633  -0.879  0.37960    
+`3pointer_attempts`   -0.032048   0.007582  -4.227 2.37e-05 ***
+`3pointer_percentage`  0.756096   0.367437   2.058  0.03961 *  
+free_throws           -1.650192   1.920547  -0.859  0.39021    
+free_throw_attempts   -0.095513   0.009858  -9.689  < 2e-16 ***
+free_throw_percentage -0.122549   0.263623  -0.465  0.64203    
+offensive_rebounds    -0.008165   0.005010  -1.630  0.10316    
+total_rebounds         0.346600   0.003727  92.988  < 2e-16 ***
+assists                0.061974   0.004230  14.653  < 2e-16 ***
+steals                 0.387113   0.005458  70.931  < 2e-16 ***
+blocks                 0.091411   0.005838  15.657  < 2e-16 ***
+turnovers             -0.301993   0.004225 -71.479  < 2e-16 ***
+personal_fouls        -0.148081   0.003439 -43.063  < 2e-16 ***
+Home                   0.079632   0.040384   1.972  0.04862 *  
+Away                  -0.346497   0.040238  -8.611  < 2e-16 ***
+Neutral                      NA         NA      NA       NA    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 100763  on 72739  degrees of freedom
+Residual deviance:  41392  on 72720  degrees of freedom
+AIC: 41432
+
+Number of Fisher Scoring iterations: 6
+
+Start:  AIC=41620.74
+game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointers` + `3pointer_attempts` + 
+    `3pointer_percentage` + free_throws + free_throw_attempts + 
+    free_throw_percentage + offensive_rebounds + total_rebounds + 
+    assists + steals + blocks + turnovers + personal_fouls + 
+    Home + Away + Neutral
+
+
+Step:  AIC=41620.74
+game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointers` + `3pointer_attempts` + 
+    `3pointer_percentage` + free_throws + free_throw_attempts + 
+    free_throw_percentage + offensive_rebounds + total_rebounds + 
+    assists + steals + blocks + turnovers + personal_fouls + 
+    Home + Away
+
+                        Df Deviance   AIC
+- free_throw_percentage  1    41393 41610
+- free_throws            1    41394 41611
+- `3pointers`            1    41394 41611
+- field_goals            1    41394 41611
+- points                 1    41395 41611
+- offensive_rebounds     1    41395 41612
+- Home                   1    41396 41613
+- `3pointer_percentage`  1    41397 41614
+- field_goal_percentage  1    41403 41620
+<none>                        41392 41621
+- `3pointer_attempts`    1    41410 41627
+- Away                   1    41466 41683
+- free_throw_attempts    1    41485 41702
+- assists                1    41609 41826
+- blocks                 1    41641 41858
+- field_goal_attempts    1    42007 42224
+- personal_fouls         1    43397 43614
+- steals                 1    47732 47949
+- turnovers              1    47805 48022
+- total_rebounds         1    54464 54681
+
+Step:  AIC=41609.54
+game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointers` + `3pointer_attempts` + 
+    `3pointer_percentage` + free_throws + free_throw_attempts + 
+    offensive_rebounds + total_rebounds + assists + steals + 
+    blocks + turnovers + personal_fouls + Home + Away
+
+                        Df Deviance   AIC
+- free_throws            1    41394 41600
+- `3pointers`            1    41394 41600
+- field_goals            1    41394 41600
+- points                 1    41395 41600
+- offensive_rebounds     1    41395 41601
+- Home                   1    41396 41602
+- `3pointer_percentage`  1    41397 41602
+- field_goal_percentage  1    41403 41609
+<none>                        41393 41610
+- `3pointer_attempts`    1    41411 41616
+- Away                   1    41467 41672
+- assists                1    41609 41815
+- blocks                 1    41641 41847
+- free_throw_attempts    1    41822 42028
+- field_goal_attempts    1    42007 42213
+- personal_fouls         1    43397 43603
+- steals                 1    47732 47937
+- turnovers              1    47805 48011
+- total_rebounds         1    54464 54670
+
+Step:  AIC=41599.61
+game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointers` + `3pointer_attempts` + 
+    `3pointer_percentage` + free_throw_attempts + offensive_rebounds + 
+    total_rebounds + assists + steals + blocks + turnovers + 
+    personal_fouls + Home + Away
+
+                        Df Deviance   AIC
+- `3pointers`            1    41396 41590
+- offensive_rebounds     1    41397 41591
+- Home                   1    41398 41592
+- `3pointer_percentage`  1    41398 41592
+- field_goal_percentage  1    41405 41599
+<none>                        41394 41600
+- `3pointer_attempts`    1    41412 41606
+- field_goals            1    41419 41613
+- Away                   1    41468 41662
+- assists                1    41611 41805
+- blocks                 1    41642 41837
+- free_throw_attempts    1    41824 42018
+- field_goal_attempts    1    42009 42203
+- points                 1    43135 43329
+- personal_fouls         1    43399 43593
+- steals                 1    47734 47928
+- turnovers              1    47807 48001
+- total_rebounds         1    54468 54662
+
+Step:  AIC=41590.36
+game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointer_attempts` + `3pointer_percentage` + 
+    free_throw_attempts + offensive_rebounds + total_rebounds + 
+    assists + steals + blocks + turnovers + personal_fouls + 
+    Home + Away
+
+                        Df Deviance   AIC
+- offensive_rebounds     1    41399 41582
+- `3pointer_percentage`  1    41399 41582
+- Home                   1    41400 41583
+<none>                        41396 41590
+- field_goal_percentage  1    41409 41592
+- field_goals            1    41422 41605
+- Away                   1    41471 41653
+- `3pointer_attempts`    1    41577 41760
+- assists                1    41611 41794
+- blocks                 1    41644 41827
+- free_throw_attempts    1    41836 42019
+- field_goal_attempts    1    42017 42200
+- points                 1    43228 43411
+- personal_fouls         1    43401 43584
+- steals                 1    47739 47922
+- turnovers              1    47812 47994
+- total_rebounds         1    54474 54656
+
+Step:  AIC=41581.66
+game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointer_attempts` + `3pointer_percentage` + 
+    free_throw_attempts + total_rebounds + assists + steals + 
+    blocks + turnovers + personal_fouls + Home + Away
+
+                        Df Deviance   AIC
+- `3pointer_percentage`  1    41402 41573
+- Home                   1    41403 41574
+<none>                        41399 41582
+- field_goal_percentage  1    41411 41582
+- field_goals            1    41424 41595
+- Away                   1    41473 41644
+- `3pointer_attempts`    1    41578 41749
+- assists                1    41615 41786
+- blocks                 1    41652 41823
+- free_throw_attempts    1    41854 42026
+- field_goal_attempts    1    42050 42221
+- points                 1    43260 43431
+- personal_fouls         1    43404 43575
+- steals                 1    47743 47914
+- turnovers              1    47902 48073
+- total_rebounds         1    57102 57274
+
+Step:  AIC=41572.93
+game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointer_attempts` + free_throw_attempts + 
+    total_rebounds + assists + steals + blocks + turnovers + 
+    personal_fouls + Home + Away
+
+                        Df Deviance   AIC
+- Home                   1    41405 41565
+<none>                        41402 41573
+- field_goal_percentage  1    41415 41575
+- field_goals            1    41433 41593
+- Away                   1    41475 41635
+- `3pointer_attempts`    1    41610 41770
+- assists                1    41630 41790
+- blocks                 1    41654 41814
+- field_goal_attempts    1    42050 42210
+- free_throw_attempts    1    42059 42218
+- personal_fouls         1    43404 43563
+- points                 1    44226 44386
+- steals                 1    47744 47903
+- turnovers              1    47905 48065
+- total_rebounds         1    57103 57263
+
+Step:  AIC=41565.22
+game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointer_attempts` + free_throw_attempts + 
+    total_rebounds + assists + steals + blocks + turnovers + 
+    personal_fouls + Away
+
+                        Df Deviance   AIC
+<none>                        41405 41565
+- field_goal_percentage  1    41419 41567
+- field_goals            1    41436 41585
+- `3pointer_attempts`    1    41612 41761
+- assists                1    41641 41790
+- Away                   1    41647 41796
+- blocks                 1    41661 41809
+- field_goal_attempts    1    42055 42203
+- free_throw_attempts    1    42059 42207
+- personal_fouls         1    43435 43583
+- points                 1    44226 44375
+- steals                 1    47766 47914
+- turnovers              1    47908 48057
+- total_rebounds         1    57117 57266
+
+Call:
+glm(formula = game_decision ~ points + field_goals + field_goal_attempts + 
+    field_goal_percentage + `3pointer_attempts` + free_throw_attempts + 
+    total_rebounds + assists + steals + blocks + turnovers + 
+    personal_fouls + Away, family = binomial, data = trainingmodel)
+
+Coefficients:
+                       Estimate Std. Error z value Pr(>|z|)    
+(Intercept)           -1.922998   0.679413  -2.830 0.004649 ** 
+points                 0.231852   0.004596  50.447  < 2e-16 ***
+field_goals           -0.162321   0.029264  -5.547 2.91e-08 ***
+field_goal_attempts   -0.314384   0.012544 -25.063  < 2e-16 ***
+field_goal_percentage  5.544566   1.527739   3.629 0.000284 ***
+`3pointer_attempts`   -0.043263   0.003021 -14.322  < 2e-16 ***
+free_throw_attempts   -0.093891   0.003715 -25.275  < 2e-16 ***
+total_rebounds         0.344578   0.003503  98.360  < 2e-16 ***
+assists                0.063418   0.004147  15.293  < 2e-16 ***
+steals                 0.386863   0.005448  71.008  < 2e-16 ***
+blocks                 0.092376   0.005820  15.871  < 2e-16 ***
+turnovers             -0.302619   0.004210 -71.883  < 2e-16 ***
+personal_fouls        -0.148001   0.003418 -43.305  < 2e-16 ***
+Away                  -0.403754   0.025945 -15.562  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 100763  on 72739  degrees of freedom
+Residual deviance:  41405  on 72726  degrees of freedom
+AIC: 41433
+
+Number of Fisher Scoring iterations: 6

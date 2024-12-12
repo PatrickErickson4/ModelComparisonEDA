@@ -1,0 +1,5 @@
+install.packages("tidyr")
+install.packages("dyplr")
+install.packages("ggplot2")
+install.packages("pROC")
+install.packages("h2o")

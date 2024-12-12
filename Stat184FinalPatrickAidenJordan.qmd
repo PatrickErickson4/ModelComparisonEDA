@@ -17,69 +17,74 @@ In basketball, a number of statistics can be used in order to predict the winner
 -   The data set must be large to be able to test accurately.
 -   The data set has meaningful predictors are practically relevant to our test case.
 -   The data set contains a binary-interpretable winning/losing team variable (to train and test on)
--   The data set follows F.A.I.R and C.A.R.E principles.
+-   The data set follows **F.A.I.R** and **C.A.R.E** principles.
 
-We ultimately landed on the *NCAA Regular Season Basketball Dataset* by Nate Duncan (Kaggle), due to its extremely high case to variable ratio (90902:40), the fact that the data set had many predictors that would practically contribute to the winning or losing of a team, and that it had included a winning and losing team (binary value).
+We ultimately landed on the *NCAA Regular Season Basketball Dataset* by Nate Duncan (Kaggle), due to its extremely high case to variable ratio (90902:40), the fact that the data set had many predictors that would practically contribute to the winning or losing of a team, and that it had included a winning and losing team, which is our testing parameter.
 
 ### Ethical Considerations in the Choice of our Data Set
 
-In order to ensure the ethical feasibility of the data set, we also scrutinized our selection to follow the F.A.I.R and C.A.R.E principles as discussed in class.
+In order to ensure the ethical feasibility of the data set, we also scrutinized our selection to follow the **F.A.I.R** and **C.A.R.E** principles as discussed in class.
 
 Since we had obtained our data from the open-source data hub Kaggle, we can ensure that anyone can **find** and **access** this data set through Kaggle's use guidelines, stating for a free distribution of data sets that are published for public use to practice ML or data analysis on. The data is also highly versatile, taking a csv format. This is one of the most **interoperable** formats there are for data sets, especially for our use-case in R, where reading in a csv is already built into the base. Lastly, the data set can be **reused** for multiple types of data analysis, and will always remain relevant for its time period.
 
 In terms of **collective benefit**, the data set contributes to an overall understanding of basketball without harming any individuals or teams, due to the fact that it is simply raw data. Secondly, as I had stated the author's name, there is clearly ownership over the data set, showing proper **Authority to Control**. Since proper attributions are maintained, it also falls under the **Responsibility and Ethics** guidelines of the C.A.R.E principles.
 
-### Loading the Data Set
+## Approach
 
-In conclusion, our data set satisfies all of the previously stated requirements and is therefore a suitable candidate to perform our logistical regression analysis on. Let us therefore load this data set in for further analysis:
+Our main goal is to be able to predict if a team will win or lose based on the statistical metrics given by the data set. Given that this is a binary classification, we can utilize **logistic regression** as a valid means of predicting a win or loss.
 
-```{r}
-#| echo: false
-library(tidyr)
-library(ggplot2)
-library(dplyr)
+### Introduction to Logistical Regression
 
-basketball.data <- read.csv("games.csv")
-head(basketball.data,5)
-```
+Logistical regression is a form of regression analysis in which, unlike normal regression where $\hat{\beta}_{MLE}$ (the regression coefficient) be used to explain a direct linear relationship between two variables (conventionally represented as $x_i^T\hat{\beta} + \epsilon_i$ in multiple linear regression), we have such that a logistic regression model is a regression model that can be represented as the log of the odds, or functionally, $$log(\frac{\theta_i}{1-\theta_i}) = x_i^T\hat{\beta}=logit(\theta_i)$$
 
-## Readying the data for logistic regression analysis
+We can obtain the odds of any one team winning or losing by exponentiating $logit(\theta_i)$, where $\hat\beta$ is fixed and $x_i$ is any valid input of a vector of statistics. This will give us some probability of a team winning based on all the statistical metrics we initially input based on the functional form $\theta_i = logit^{-1}(x_i^T\hat{\beta})$ . We then have some sort of prediction threshold, where we "predict" whether a team will win or lose based on said threshold. This is therefore a possible solution to our proposed question, where we wish to determine the binary probability of a win or a loss (this is our respective $\theta_i$ in terms of the logistic regression model) based on some combination of the factors in our data set. We can therefore use our data set to "train" a logistic regression model, where every individual case of some combination of specified statistics can lead to a more accurate prediction. For the sake of simplicity, we will be using Base R's glm() function to perform our logistic regression.
+
+### Multicolinearity and Fallibilities of Logistic Regression
+
+It is important to note that logistic regression does not come without its downsides. For example, when two predictors are highly colinear (the change in one of the variables can be explained by the change in the other), the regression model has trouble discerning the overall effect that these predictors may have in tandem, even when they may be statistically significant to predictions. This problem can compound, where many variables are multicolinear, meaning there is some set $S\in i, i = \{1,\cdots,n\}$ such that each variable in $S$ can be explained by the combination of all of the other variables in $S$. Furthermore, the computational method that Base R uses is iterative numerical optimization, which is used to estimate $\hat\beta_{MLE}$. Multicollinearity with this method can therefore lead to instability in coefficient estimates. Consequently, when values are highly colinear, the issue arises where rounding errors can worsen the overall prediction by causing the calculations propagated through the decision matrix to be absurdly high or low, effectively incorrectly reporting a variable's log odd influence. This incorrect fixing of the log odd influence coefficient can lead to such a strong prediction of the original training data that whenever you try to input new data for the model to try and "predict", we get that the model will perform more poorly. This is called overfitting, and this can dampen the prediction power of the model. In order to circumvent these issues, we will be doing some primary exploratory data analysis, as well as some well-established methods when constructing our model to avoid such clashes.
+
+### Exploratory Data Analysis on the Potential Multicolinearity in the Data Set
+
+In order to obtain a better understanding of the multicolinearity of our matrix,we can create a pairwise multicolinearity heatmap that displays the biggest offenders in our data.
+
+# INSERT HEATMAP HERE!!!!!!!!!!!!!!!
+
+Upon talking to Jordan (basketball guy), we came to the conclusion that half our dataset sucks. We will remove the suck.
+
+## Readying the Data for Exploratory Logistic Regression Analysis
 
 The nature of our model requires that we have valid data points to be able to perform proper regression testing (you are not able to plot null values). Due to the fact that the data set is sufficiently large, it is very likely that the data wouldn't be interpretable for the purposes mentioned above. We will view the following data to ensure the feasibility of our data set. The Kaggle data set gives us some insight about every single variable within the data set. We will refer to them here:
 
-![](ProjectPictures/5_1cols.jpg)![](ProjectPictures/5_2cols.jpg)![](ProjectPictures/5_3cols.jpg)![](ProjectPictures/5_4cols.jpg)![](ProjectPictures/5_5cols.jpg)![](ProjectPictures/5_6cols.jpg) ![](ProjectPictures/5_7cols.jpg)![Initial Data Analysis Photos, courtesy of Kaggle.com dataset preview](ProjectPictures/5_8cols.jpg)
+![](Stat184ProjectPictures/5_1cols.jpg)![](Stat184ProjectPictures/5_2cols.jpg)![](Stat184ProjectPictures/5_3cols.jpg)![](Stat184ProjectPictures/5_4cols.jpg)![](Stat184ProjectPictures/5_5cols.jpg)![](Stat184ProjectPictures/5_6cols.jpg) ![](Stat184ProjectPictures/5_7cols.jpg)![Initial Data Analysis Photos, courtesy of Kaggle.com dataset preview](Stat184ProjectPictures/5_8cols.jpg)
 
 ### Solving interpretability issues
 
 Upon closer inspection we have found offending points that will ultimately statistically skew our data, as well as possible null values that may break our regression models and calculations in the latter processes of our analysis. Additionally, we can also see that it is extremely hard to determine what each statistic is based on their respective abbreviations. As a result, we need to go through a four step process to clean and ready the data for further analysis and testing:
 
 -   Reject any null values that may appear in the data set, since we can not interpret them.
--   Reject any negative values from the data
--   Rename every variable within the basketball data set to match that of the subscripted value beneath the name of the column on the website for better readability
--   Prune any case that is not a win or loss
-
-We can utilize the following R code to accomplish these tasks:
-
-### Removal of poor/colinear variables
-
-We can see that this is especially within the percentage values, where we see some of the values being reported as 6300% which is obviously not feasible for the scope of these variables. Furthermore, since the idea behind the values of the percentages are some proportional combination of 2 other variables within the data set. This will cause issues of co-linearity within our regression model, where $\bar{\theta}_{MLE}$ can not be calculated due to the fact that the design matrix of the logistic regression function will ultimately become singular. Done with AIC
+-   Reject any negative values from the data.
+-   Rename every variable within the basketball data set to match that of the subscripted value beneath.
+-   the name of the column on the website for better readability.
+-   Change wins and losses to a binary 1 or 0.
+-   
 
 ### Ensuring our testing variable is binary
 
 When reviewing the game decision variable, we will notice that there are some offending values. We will therefore remove any cases where the indicator for a winning or losing team is not either "W" or "L".
 
-Reject:
+# I broke this aiden :( can u help fix plz
 
 ```{r}
 
-cor_matrix <- cor(basketball.data %>% select(where(is.numeric)))
 
+basketball.data <- read.csv("games.csv")
+basketball.data <- fullmodel %>%
+  mutate(across(everything(), ~ as.numeric(as.character(.))))
+cor_matrix <- cor(basketball.data %>% select(where(is.numeric)))
 cor_data <- as.data.frame(as.table(cor_matrix))
 colnames(cor_data) <- c("Var1", "Var2", "Correlation")
-
 cor_data <- cor_data %>%
   mutate(Color = ifelse(abs(Correlation) >= 0.95, "black", NA))
-
 ggplot(cor_data, aes(Var1, Var2, fill = Correlation)) +
   geom_tile(color = "white") +
   scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
@@ -90,255 +95,10 @@ ggplot(cor_data, aes(Var1, Var2, fill = Correlation)) +
        x = "Variable 1",
        y = "Variable 2",
        fill = "Correlation")
-
-
-
-
 ```
 
--## Can we predict whether a team will win or not based on the given data?
+## Assessing colinearity within our dataset
 
-Determining whether or not the team
+### Opponent variables
 
-```{r}
-library(tidyr)
-library(ggplot2)
-library(dplyr)
-
-basketball_data <- read.csv("games.csv")
-
-#remove any null values
-basketball_data <- na.omit(basketball_data)
-
-
-# Rename specific columns
-basketball_data <- basketball_data %>%
-  rename(
-    game_decision = w_l,
-    points = pts,
-    opp_points = opp_pts,
-    field_goals = fg,
-    field_goal_attempts = fga,
-    field_goal_percentage = fg_per,
-    `3pointers` = `X3p`,
-    `3pointer_attempts` = `X3pa`,
-    `3pointer_percentage` = `X3p_per`,
-    free_throws = ft,
-    free_throw_attempts = fta,
-    free_throw_percentage = ft_per,
-    offensive_rebounds = orb,
-    total_rebounds = trb,
-    assists = ast,
-    steals = stl,
-    blocks = blk,
-    turnovers = tov,
-    personal_fouls = pf,
-    opp_fieldgoals = opp_fg,
-    opp_fieldgoal_attempts = opp_fga,
-    opp_fieldgoal_percentage = opp_fg_per,
-    `opp_3pointers` = `opp_3p`,
-    `opp_3pointer_attempts`= `opp_3pa`,
-    `opp_3pointer_percentatge` = `opp_3p_per`,
-    opp_freethrows = opp_ft,
-    opp_freethrow_attempts = opp_ft_per,
-    opp_offensive_rebounds = opp_orb,
-    opp_assists = opp_ast,
-    opp_steals = opp_stl,
-    opp_blocks = opp_blk,
-    opp_turnovers = opp_tov,
-    opp_personal_fouls = opp_pf
-  )
-
-# From all number values, remove numbers < 0
-basketball_data <- basketball_data %>%
-  filter(if_all(everything(), ~ . >= 0))
-
-
-# Make it so that the opposing team values are removed, and categorical variables that can't be 1-hot encoded are removed
-basketball_data <- basketball_data %>%
-   # Step 1: Drop variables containing percentages
-#  select(-matches("percentage")) %>%
-  
-  # Step 2: Drop specific variables: game_num, date, and any column containing "opp"
-  select(-game_num, -date, -contains("opp")) %>%
-  
-  # Step 3: Filter rows where site contains valid values and one-hot encode site
-  filter(site %in% c("Home", "Away", "Neutral")) %>%
-  mutate(
-    Home = ifelse(site == "Home", 1, 0),
-    Away = ifelse(site == "Away", 1, 0),
-    Neutral = ifelse(site == "Neutral", 1, 0)
-  ) %>%
-  select(-site)  # Drop the original site column
-
-
-fullmodel <- basketball_data %>%
-  select(-team_name) %>%
-  mutate(
-    game_decision = ifelse(game_decision == "W", 1, 0)
-  )
-fullmodel <- fullmodel %>%
-  mutate(across(everything(), ~ as.numeric(as.character(.))))
-regressionmodel <- na.omit(regressionmodel)
-
-
-# Set a seed for reproducibility
-set.seed(112911)
-
-# Create an index for the training set (80% of the rows)
-train_index <- sample(1:nrow(fullmodel), 0.8 * nrow(fullmodel))
-
-# Split the data
-trainingmodel <- fullmodel[train_index, ]  # 80% training data
-
-testset <- fullmodel[-train_index, ] #20%
-
-```
-
-```{r}
-game_decision <- trainingmodel$game_decision
-points <- trainingmodel$points
-field_goals<- trainingmodel$field_goals
-field_goal_attempts<- trainingmodel$field_goal_attempts
-field_goal_percentage<- trainingmodel$field_goal_percentage
-`3pointers`<- trainingmodel$`3pointers`
-`3pointer_attempts`<- trainingmodel$`3pointer_attempts`
-`3pointer_percentage`<- trainingmodel$`3pointer_percentage`
-free_throws<- trainingmodel$free_throws
-free_throw_attempts<- trainingmodel$free_throw_attempts
-free_throw_percentage<- trainingmodel$free_throw_percentage
-offensive_rebounds<- trainingmodel$offensive_rebounds
-total_rebounds<- trainingmodel$total_rebounds
-assists<- trainingmodel$assists
-steals<- trainingmodel$steals
-blocks<- trainingmodel$blocks
-turnovers<- trainingmodel$turnovers
-personal_fouls<- trainingmodel$personal_fouls
-Home<- trainingmodel$Home
-Away<- trainingmodel$Away
-Neutral<- trainingmodel$Neutral
-
-
-
-naivemodel <- glm(game_decision ~ 
-             points +
-             field_goals +
-             field_goal_attempts +
-             field_goal_percentage +
-             `3pointers` +
-             `3pointer_attempts` +
-             `3pointer_percentage`+
-             free_throws+
-             free_throw_attempts+
-             free_throw_percentage+
-             offensive_rebounds+
-             total_rebounds+
-             assists+
-             steals+
-             blocks+
-             turnovers+
-             personal_fouls+
-             Home+
-             Away+
-             Neutral,
-           data = trainingmodel,
-           family = binomial
-)
-
-summary(res)
-parsimoniousmodel <- step(res, k=log(nrow(regressionmodel)))
-summary(parsimoniousmodel)
-```
-
-```{r}
-
-# Load necessary libraries
-library(pROC)
-library(ggplot2)
-
-# Predict probabilities for the test set
-naivemodel_probs <- predict(naivemodel, newdata = testset, type = "response")
-parsimonious_probs <- predict(parsimoniousmodel, newdata = testset, type = "response")
-
-# Compute AUC values
-naivemodel_auc <- auc(testset$game_decision, naivemodel_probs)
-parsimonious_auc <- auc(testset$game_decision, parsimonious_probs)
-
-# Generate ROC curves
-naivemodel_roc <- roc(testset$game_decision, naivemodel_probs)
-parsimonious_roc <- roc(testset$game_decision, parsimonious_probs)
-
-# Create ROC curve data for ggplot
-naivemodel_roc_df <- data.frame(
-  FPR = 1 - naivemodel_roc$specificities,
-  TPR = naivemodel_roc$sensitivities
-)
-
-parsimonious_roc_df <- data.frame(
-  FPR = 1 - parsimonious_roc$specificities,
-  TPR = parsimonious_roc$sensitivities
-)
-
-# Plot ROC curve for Full Model (res)
-roc_plot_naivemodel <- ggplot(naivemodel_roc_df, aes(x = FPR, y = TPR)) +
-  geom_line(color = "blue", size = 1.2) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
-  labs(
-    title = "ROC Curve for Full Model",
-    x = "False Positive Rate (1 - Specificity)",
-    y = "True Positive Rate (Sensitivity)"
-  ) +
-  theme_minimal() +
-  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(res_auc, 3)), size = 5, color = "blue")
-
-# Plot ROC curve for Parsimonious Model
-roc_plot_parsimonious <- ggplot(parsimonious_roc_df, aes(x = FPR, y = TPR)) +
-  geom_line(color = "red", size = 1.2) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
-  labs(
-    title = "ROC Curve for Parsimonious Model",
-    x = "False Positive Rate (1 - Specificity)",
-    y = "True Positive Rate (Sensitivity)"
-  ) +
-  theme_minimal() +
-  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(parsimonious_auc, 3)), size = 5, color = "red")
-
-# Print the plots
-print(roc_plot_naivemodel)
-print(roc_plot_parsimonious)
-```
-
-```{r}
-
-randomvarregression <- glm(game_decision ~ 
-             Home+
-             points+
-             Away,
-             data = trainingmodel,
-             family = binomial)
-  
-summary(randomvarregression)
-```
-
-```{r}
-random_probs <- predict(randomvarregression, newdata = testset, type = "response")
-random_auc <- auc(testset$game_decision, random_probs)
-random_roc <- roc(testset$game_decision, random_probs)
-
-random_roc_df <- data.frame(
-  FPR = 1 - random_roc$specificities,
-  TPR = random_roc$sensitivities
-)
-
-roc_plot_random <- ggplot(random_roc_df, aes(x = FPR, y = TPR)) +
-  geom_line(color = "blue", size = 1.2) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
-  labs(
-    title = "ROC Curve for Full Model",
-    x = "False Positive Rate (1 - Specificity)",
-    y = "True Positive Rate (Sensitivity)"
-  ) +
-  theme_minimal() +
-  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(random_auc, 3)), size = 5, color = "blue")
-print(roc_plot_random)
-```
+Colinearity is a pressing issue within the datascience ![](Stat184ProjectPictures/ROC_Naive.png)![](Stat184ProjectPictures/ROC_Parsimonious.png)
