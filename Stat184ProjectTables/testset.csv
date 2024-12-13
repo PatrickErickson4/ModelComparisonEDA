@@ -1,4 +1,4 @@
-"game_decision","points","field_goals","field_goal_attempts","field_goal_percentage","3pointers","3pointer_attempts","3pointer_percentage","free_throws","free_throw_attempts","free_throw_percentage","offensive_rebounds","total_rebounds","assists","steals","blocks","turnovers","personal_fouls","Home","Away","Neutral"
+"game_decision","points","field_goals","field_goal_attempts","field_goal_percentage","X3pointers","X3pointer_attempts","X3pointer_percentage","free_throws","free_throw_attempts","free_throw_percentage","offensive_rebounds","total_rebounds","assists","steals","blocks","turnovers","personal_fouls","Home","Away","Neutral"
 0,64,19,50,0.38,9,20,0.45,17,25,0.68,10,36,13,4,2,13,26,0,1,0
 1,90,31,62,0.5,11,25,0.44,17,21,0.81,8,36,22,5,9,13,14,1,0,0
 1,99,33,58,0.569,10,19,0.526,23,25,0.92,12,43,24,8,2,12,15,1,0,0
