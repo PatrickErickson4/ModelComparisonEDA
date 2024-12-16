@@ -5,6 +5,10 @@ format: pdf
 editor: visual
 csl: mla.csl
 appendix: true
+execute:
+  echo: false
+  warning: false
+  message: false  
 ---
 
 # Exploratory Predictive Data Analysis for Basketball Teams: Can we Create a Model to Predict if one Basketball Team will Win over Another?
@@ -46,6 +50,7 @@ Particular motivations for 1-hot and binary encoding arose due to the fact that 
 Based on the following information, we can perform the following operations to achieve a new, cleaned dataframe:
 
 ```{r}
+
 library(dplyr)
 library(tidyr)
 basketball_data <- read.csv("Stat184ProjectTables/games.csv")
@@ -111,15 +116,16 @@ basketball_data <- basketball_data %>%
   select(-site)  # Drop the original site column
 
 write.csv(basketball_data, "Stat184ProjectTables/renamed_games.csv", row.names = FALSE)
-head(basketball_data)
 
 ```
 
-By looking at the head, we can see that this model is much easier to interpret.
+By looking at the head, we can see that this model is much easier to interpret. The following gives us a little more information that we can use for our data analysis:
+
+# Aiden, include 1 table of means, SD, quantiles, of all of our variables of interest. Look at the NaiveModel code for examples.
 
 ### Initial Exploratory Data Analysis
 
-In order to build up on the notion of prediction, We are particularly interested in the metric of wins and losses, as this is generally the metric of greatest interest for every basketball team, every season. Therefore, our data focus will be around **wins and losses**, and the potential relationships every variable has on this metric. We can view a simple bar graph to see if there is an imbalance between.
+In order to build up on the notion of prediction, We are particularly interested in the metric of wins and losses, as this is generally the metric of greatest interest for every basketball team, every season. Therefore, our data focus will be around **wins and losses**, and the potential relationships every variable has on this metric. We can view a simple bar graph to see if there is an imbalance between wins and losses.
 
 ```{r}
 library(dplyr)
@@ -312,7 +318,6 @@ testset <- fullmodel[-train_index, ] #20%
 write.csv(fullmodel, "Stat184ProjectTables/fullmodel.csv", row.names = FALSE)
 write.csv(trainingset,"Stat184ProjectTables/trainingset.csv",row.names = FALSE)
 write.csv(testset,"Stat184ProjectTables/testset.csv",row.names = FALSE)
-head(fullmodel)
 ```
 
 Here we make the choice to use single train/test sets to make reproducibility easier, as well as reduce our computational overhead. The head of the model is shown as the final result for our logistic regression model fitting.
@@ -360,9 +365,7 @@ This graph essentially shows what happens for every unit increase in points. Not
 
 ### Hypothesis Test for Model Significance
 
-Despite the fact that our logistic regression model can produce some prediction of our binary outcome, it may turn out that the predictor used to construct the model might be completely garbage. In other words, it could either have too weak of a relationship with the binary outcome (game decision), meaning the overall power of this predictor might not be statistically significant. Luckily, Base R's logistic regression models allow us to extract the Null and Residual Deviances ($D_N$ and $D_R$ for our use case), which can be used as a metric to perform a goodness of fit test. The differences in their degrees of freedom $df$ follows a $\chi^2_{df}$ distribution, or more intuitively the number of predictors within our model (1). We can therefore construct the following hypothesis test to test for model significance: 
-$$H_0: \beta_1 = 0$$
-$$H_1: \beta_1 \neq 0$$
+Despite the fact that our logistic regression model can produce some prediction of our binary outcome, it may turn out that the predictor used to construct the model might be completely garbage. In other words, it could either have too weak of a relationship with the binary outcome (game decision), meaning the overall power of this predictor might not be statistically significant. Luckily, Base R's logistic regression models allow us to extract the Null and Residual Deviances ($D_N$ and $D_R$ for our use case), which can be used as a metric to perform a goodness of fit test. The differences in their degrees of freedom $df$ follows a $\chi^2_{df}$ distribution, or more intuitively the number of predictors within our model (1). We can therefore construct the following hypothesis test to test for model significance: $$H_0: \beta_1 = 0$$ $$H_1: \beta_1 \neq 0$$
 
 Based on the following distribution, we will plot both the p-value and the distribution to either reject or fail to reject our null hypothesis:
 
@@ -395,7 +398,7 @@ ggplot(chi_sq_data, aes(x = x, y = density)) +
   geom_line(color = "blue", size = 1) +
   theme_minimal() +
   labs(
-    title = "Chi-squared Distribution with 1 Degree of Freedom",
+    title = "Goodness-of-Fit for Simple Model",
     x = "Chi-squared Value",
     y = "Density"
   ) +
@@ -480,7 +483,7 @@ ggplot(roc_data_combined, aes(x = 1 - specificity, y = sensitivity, color = Type
   annotate(
     "text",
     x = 0.5, y = 0.2, 
-    label = paste("Random AUC =", round(auc_random, 3)), 
+    label = paste("Random AUC =", round(.489, 3)), 
     color = "red", 
     size = 5, 
     hjust = 0
@@ -502,7 +505,7 @@ ggplot(roc_data_combined, aes(x = 1 - specificity, y = sensitivity, color = Type
   )
 ```
 
-Here we can see the baseline AUC in blue, specifying that a model would not do any better than randomly guessing the outcome, and so we get a curve that mimics the probability of our initial ratio of wins to losses, 52%. Meanwhile, marked in green is the perfect case, where a model's efficacy is perfect. We are aiming to achieve the green with our model.
+Here we can see the baseline AUC in blue, specifying that a model would not do any better than randomly guessing the outcome, and so we get a curve that mimics the probability of our initial ratio of wins to losses is near .5. Meanwhile, marked in green is the perfect case, where a model's efficacy is perfect. We are aiming to achieve the green with our model.
 
 We can therefore construct our ROC curve and compute the AUC for our simple regression model to see if it does any better than random sampling (.52 AUC). We hand previously created a test set of 20% of our dataset, which we will use to compute the following.
 
@@ -510,11 +513,13 @@ We can therefore construct our ROC curve and compute the AUC for our simple regr
 library(ggplot2)
 library(dplyr)
 
+# calculate ROC and AUC values
 testset <- read.csv("Stat184ProjectTables/testset.csv")
 random_probs <- predict(singleregression, newdata = testset, type = "response")
 random_auc <- auc(testset$game_decision, random_probs)
 random_roc <- roc(testset$game_decision, random_probs)
 
+#construct df for ggplot w values from prev
 random_roc_df <- data.frame(
   FPR = 1 - random_roc$specificities,
   TPR = random_roc$sensitivities
@@ -532,15 +537,13 @@ ggplot(random_roc_df, aes(x = FPR, y = TPR)) +
   annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(random_auc, 10)), size = 5, color = "blue")
 ```
 
-We can therefore infer that our model does improve our odds of predicting the binary classifier. **Keep in mind that this is not a measure of accuracy, rather it is a tool to be able to compare some models with others**
+We can therefore infer that our model does improve our odds of predicting the binary classifier. **Keep in mind that this is not a measure of accuracy, rather it is a tool to be able to compare the efficacy some models with others.**
 
 ### Naively Fitting all of our predictors of interest (Make improvements to the models)
 
-Understanding how we can compare two models' efficacies, we will now construct a new model, computing the following tests to see how well it does with models that we have already tested, and test the model for model significance. We will construct our null and alternatives as: 
+We can now compare two models' efficacies with AUC of ROC. We will now construct a new model, computing the following tests to see how well it does with models that we have already tested. We will also test the model for model significance. We will construct our null and alternatives as:
 
-$$H_0: \beta_1 = \beta_2 =\cdots = \beta_i = 0$$
-$$H_1: \beta_1 = \beta_2 =\cdots = \beta_i \neq 0$$
-essentially expanding our simple regression goodness of fit test for significance to include all of our parameters of interest. This is a total of 20 variables, which follows $\chi_{20}^2$.
+$$H_0: \beta_1 = \beta_2 =\cdots = \beta_i = 0$$ $$H_1: \beta_1 = \beta_2 =\cdots = \beta_i \neq 0$$ essentially expanding our simple regression goodness of fit test for significance to include all of our parameters of interest. This is a total of 20 variables, which follows $\chi_{20}^2$.
 
 ```{r}
 library(pROC)
@@ -548,6 +551,8 @@ library(ggplot2)
 ts <- read.csv("Stat184ProjectTables/trainingset.csv")
 
 
+# need to vectorize all columns of the training set
+# courtesy of Dr. Hyungusk Tak
 game_decision <- ts$game_decision
 points <- ts$points
 field_goals<- ts$field_goals
@@ -571,6 +576,7 @@ Away<- ts$Away
 Neutral<- ts$Neutral
 
 
+#logisitic regression
 naivemodel <- glm(game_decision ~ 
                     points +
                     field_goals +
@@ -612,8 +618,6 @@ chisq_stat <- null_deviance - residual_deviance
 p_value <- 1 - pchisq(chisq_stat, df_diff)
 ```
 
-For reference, this is what $X_{20}^2$ looks like without such outrageous boundaries:
-
 ```{r}
 library(ggplot2)
 
@@ -631,7 +635,7 @@ ggplot(chi_sq_data, aes(x = x, y = density)) +
   geom_line(color = "blue", size = 1) +
   theme_minimal() +
   labs(
-    title = "Chi-squared Distribution with 19 Degrees of Freedom",
+    title = "Goodness-of-Fit Naive Model",
     x = "Chi-squared Value",
     y = "Density"
   ) +
@@ -645,8 +649,8 @@ ggplot(chi_sq_data, aes(x = x, y = density)) +
   ) +
     annotate(
     "segment", 
-    x = 47, xend = 50,  # Starting and ending x-coordinates for the arrow
-    y = 0, yend = 0,    # Starting and ending y-coordinates for the arrow
+    x = 47, xend = 50,  
+    y = 0, yend = 0,    # Starting and ending coords for arrow
     arrow = arrow(length = unit(0.2, "cm"), type = "closed"),  # Arrow settings
     color = "red",       # Arrow color
     size = 1             # Arrow thickness
@@ -679,7 +683,10 @@ naivemodel_roc_df <- data.frame(
 # naivemodel plot
 roc_plot_naivemodel <- ggplot(naivemodel_roc_df, aes(x = FPR, y = TPR)) +
   geom_line(color = "blue", size = 1.2) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
+  geom_abline(slope = 1,
+              intercept = 0,
+              linetype = "dashed",
+              color = "black") +
   labs(
     title = "ROC Curve for Full Model",
     x = "False Positive Rate (1 - Specificity)",
@@ -701,7 +708,7 @@ It is important to note that logistic regression does not come without its downs
 
 In order to achieve a more parsimonious model, we can employ a method known as BIC backwards elimination, where we penalize poorer fitting predictors that are highly multicolinear by a large amount. BIC then picks the greatest calculated values per predictor to eliminate, effectively expelling them from our model. In general, BIC is a more rigorous elimination method than AIC, since BIC makes use the log of the number of predictors multiplied with some penalty, where AIC uses a constant to perform the same metric. Theoretically, we can obtain a simpler model that performs just as well, if not better due to reduced overfitting, by shaving off these predictors via this method.
 
-```{r warning=FALSE,message=FALSE,echo=FALSE}
+```{r, results = 'hide'}
 
 #runs code for BIC backwards elim. WARNING: computationally expensive, takes time
 parsimoniousmodel <- step(naivemodel, k=log(20))
@@ -718,8 +725,7 @@ df_diff <- df_null - df_residual
 
 We will also construct the same tests for our new model to compare its efficacy with the other two: We will construct our null and alternatives as:
 
-$$H_0: \beta_1 = \beta_2 =\cdots = \beta_i = 0$$
-$$H_1: \beta_1 = \beta_2 =\cdots = \beta_i \neq 0 $$
+$$H_0: \beta_1 = \beta_2 =\cdots = \beta_i = 0$$ $$H_1: \beta_1 = \beta_2 =\cdots = \beta_i \neq 0 $$
 
 ```{r}
 
@@ -737,7 +743,7 @@ ggplot(chi_sq_data, aes(x = x, y = density)) +
   geom_line(color = "blue", size = 1) +
   theme_minimal() +
   labs(
-    title = "Chi-squared Distribution with 14 Degrees of Freedom",
+    title = "Goodness-of-Fit BIC Reduced Model",
     x = "Chi-squared Value",
     y = "Density"
   ) +
@@ -752,7 +758,7 @@ ggplot(chi_sq_data, aes(x = x, y = density)) +
     annotate(
     "segment", 
     x = 37, xend = 40,  # Starting and ending x-coordinates for the arrow
-    y = 0.0005, yend = 0.00013,    # Starting and ending y-coordinates for the arrow
+    y = 0.0005, yend = 0.00005,    # Starting and ending y-coordinates for the arrow
     arrow = arrow(length = unit(0.2, "cm"), type = "closed"),  # Arrow settings
     color = "red",       # Arrow color
     size = 1             # Arrow thickness
@@ -792,7 +798,7 @@ roc_plot_parsimonious <- ggplot(parsimonious_roc_df, aes(x = FPR, y = TPR)) +
 roc_plot_parsimonious
 ```
 
-We can see the difference between the AUC for the BIC model and our original model is almost negligible, with a .0001 difference between the two.
+We can see the difference between the AUC for the BIC model and our original model is almost negligible, with a .00004 difference between the two.
 
 ### Final Approach: Construction of a Neural Network
 
@@ -808,10 +814,18 @@ hidden_nodes <- 13
 output_nodes <- 1
 
 # Calculate vertical midpoint for centering layers
-max_nodes <- max(input_nodes, hidden_nodes, output_nodes)
-input_y <- seq(1, max_nodes, length.out = input_nodes)
-hidden_y <- seq(1 + (max_nodes - hidden_nodes) / 2, hidden_nodes + (max_nodes - hidden_nodes) / 2, length.out = hidden_nodes)
-output_y <- seq(1 + (max_nodes - output_nodes) / 2, output_nodes + (max_nodes - output_nodes) / 2, length.out = output_nodes)
+max_nodes <- max(input_nodes,
+                 hidden_nodes,
+                 output_nodes)
+input_y <- seq(1,
+               max_nodes,
+               length.out = input_nodes)
+hidden_y <- seq(1 + (max_nodes - hidden_nodes) / 2,
+                hidden_nodes + (max_nodes - hidden_nodes) / 2,
+                length.out = hidden_nodes)
+output_y <- seq(1 + (max_nodes - output_nodes) / 2,
+                output_nodes + (max_nodes - output_nodes) / 2,
+                length.out = output_nodes)
 
 # Create a data frame for nodes
 nodes <- data.frame(
@@ -838,11 +852,30 @@ connections <- expand.grid(
 ggplot() +
   # Plot nodes
   geom_point(data = nodes, aes(x = x, y = y), size = 5, color = "blue") +
-  geom_segment(data = connections, aes(x = x_from, y = y_from, xend = x_to, yend = y_to), alpha = 0.3) +
+  geom_segment(data = connections,
+               aes(x = x_from,
+                   y = y_from,
+                   xend = x_to,
+                   yend = y_to),
+               alpha = 0.3) +
   # Add labels for layers
-  annotate("text", x = 1.15, y = max_nodes + 2, label = "Input Layer\n(20 nodes)", size = 5, hjust = 0.5) +
-  annotate("text", x = 2, y = max_nodes + 2, label = "Hidden Layer\n(ReLU)", size = 5, hjust = 0.5) +
-  annotate("text", x = 2.85, y = max_nodes + 2, label = "Output Layer\n(Sigmoid)", size = 5, hjust = 0.5) +
+  annotate("text", x = 1.15,
+           y = max_nodes + 2,
+           label = "\n20 inputs",
+           size = 5,
+           hjust = 0.5) +
+  annotate("text",
+           x = 2,
+           y = max_nodes + 2,
+           label = "\n13 ReLU Nodes",
+           size = 5,
+           hjust = 0.5) +
+  annotate("text",
+           x = 2.85,
+           y = max_nodes + 2,
+           label = "\nSigmoid Output\nLayer",
+           size = 5,
+           hjust = 0.5) +
   # Customize the plot
   theme_void() +
   labs(title = "Final Neural Network Architecture") +
@@ -854,7 +887,10 @@ ggplot() +
 
 Due to the black-box nature of neural networks, such tests that we have used previously have become almost impossible to implement, and by the graph above, we have demonstrated that understanding of the mechanisms of the neural network become increasingly obscure. Therefore, the sole purpose of this is to see if we can achieve a better prediction margin. We can therefore compare the Neural Network's AUC of the ROC against our other two models:
 
-```{r}
+```{r, results='hide'}
+
+# It is necessary to have JVM 18.0.2.1 installed to be able to render this
+# Neural Net correctly.
 library(h2o)
 library(ggplot2)
 
@@ -872,7 +908,7 @@ test_h2o <- as.h2o(testset)
 predictors <- colnames(training_h2o)[-which(colnames(training_h2o) == "game_decision")]
 target <- "game_decision"
 
-##NN model with tuned hyperparameters after sweeps based on intuition, and comparing 
+##NN model with tuned hyperparameters after sweeps based on intuition
 model <- h2o.deeplearning(
   x = predictors,
   y = target,
@@ -930,7 +966,7 @@ Based on the generated ROC from our neural network We can see that the overall e
 
 ### Theory: Ockham's Razor
 
-Ockham's Razor is a convention that states that if we have multiple models that all produce the same efficacy margins, the simplest model that can be used to explain the data is generally preferred. While this is not set in stone, the intuition behind it makes sense, especially considering how our models may be subject to overfitting. Especially in the case of our neural network, it is many times more complex than logistic alone, where logistic regression is just one proponent of it. Because of this, the neural network is much more prone to overfitting, which could be why no matter what choice of hyperparameters I chose, I could not reach the efficacy of the logistic regression models. In terms of the BIC-reduced model, we can ultimately see that the most robust, parsimonious model is our BIC reduced model, since they all perform similarly.
+Ockham's Razor is a convention that states that if we have multiple models that all produce roughly same efficacy margins, the simplest model that can be used to explain the data is generally preferred. While this is not set in stone, the intuition behind it makes sense, especially considering how our models may be subject to overfitting. Especially in the case of our neural network, it is many times more complex than logistic alone, where logistic regression is just one proponent of it. Because of this, the neural network is much more prone to overfitting, which could be why no matter what choice of hyperparameters I chose, I could not reach the efficacy of the logistic regression models. In terms of the BIC-reduced model, we can ultimately see that the most robust, parsimonious model is our BIC reduced model, since they all perform similarly.
 
 ## Conclusion
 
@@ -939,12 +975,36 @@ Ockham's Razor is a convention that states that if we have multiple models that 
 Throughout this document, we have run into a plethora of issues including as insufficient computing power, the dimensionality of categorical variables, and time constraints. Some things to try in the future to improve the efficacy of our model analysis are:
 
 -   Obtain permission to use Neural Network Processing that is not run on a Virtual Machine to be able to implement more rigorous hyperparameter sweeps
--   Obtain more computing to be able to represent all of our categorcial variables in 1-hot and implement k-fold cross-validation
+-   Obtain more computing to be able to represent all of our categorical variables in 1-hot and implement k-fold cross-validation
 -   Expand our exploratory research question to be able to include opponent information in some combinatory statistic with teams
 
 Based on the convention of Ockham's Razor, we are ultimately able our most robust, yet parsimonious model, the BIC - reduced logistic regression model, to be able to accurately make predictions on whether we can obtain a win or a loss based on a team's statistics. The implications are that given any team, we can take their averages for a given time frame (for example, a season, a couple of games, all-time), and input it into our model. Our model, based on these statistics, can then "predict" based on these statistics of their overall performance, whether they are a "winning" team or a "losing" team. This can be useful to validate power ratings, for example, and extrapolate better predictions for future games.
 
-{{< pagebreak >}} 
-\# Code Appendix 
+{{< pagebreak >}}
+
+# Bibliography
+
+# Jordan or Aiden, we need to include these as footnotes. Ctrl +f the document to find where I used these, and set up footnotes and bibliography.
+
+need to write bibliography. Here are our following sources, already cited correct.
+
+-   Tak, Hyungsuk. "Professor of the Eberly College of Science, Pennsylvania State University."
+
+-   H2O.ai. "Deep Learning — H2O 3.42.0.1 Documentation." H2O.ai, <https://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/deep-learning.html>. Accessed 15 Dec. 2024.
+
+-   "ggplot2 Package Reference." Tidyverse, <https://ggplot2.tidyverse.org/reference/>. Accessed 15 Dec. 2024.
+
+-   Jordan, Jeremy. "A Guide to Hyperparameter Tuning." Jeremy Jordan's Blog, <https://www.jeremyjordan.me/hyperparameter-tuning/>. Accessed 15 Dec. 2024.
+
+-   Duncan, Nate. "2011 Current NCAA Basketball Games Dataset." Kaggle, <https://www.kaggle.com/datasets/nateduncan/2011current-ncaa-basketball-games>. Accessed 15 Dec. 2024.
+
+-   Tufte, Edward R. *The Visual Display of Quantitative Information.* 2nd ed., Graphics Press, 2001.
+
+-   Kosslyn, Stephen Michael. *Graph Design for the Eye and Mind.* Oxford University Press, 2006.
+
+{{< pagebreak >}}
+
+# Code Appendix
+
 ```{r codeAppend, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 ```
