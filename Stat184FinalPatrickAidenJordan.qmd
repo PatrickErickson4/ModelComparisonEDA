@@ -1,14 +1,20 @@
 ---
 title: "Stat184Final"
 author: "Patrick Erickson, Aiden Shindel, Jordan Brophy"
-format: pdf
+format: 
+  pdf:
+    cite-method: biblatex
+    pdf-engine: xelatex  
 editor: visual
+bibliography: references.bib
 csl: mla.csl
+nocite: |
+  @*
 appendix: true
 execute:
   echo: false
   warning: false
-  message: false  
+  message: false
 ---
 
 # Exploratory Predictive Data Analysis for Basketball Teams: Can we Create a Model to Predict if one Basketball Team will Win over Another?
@@ -24,7 +30,9 @@ In basketball, a number of statistics can be used in order to predict the winner
 -   The data set contains a winning/losing team variable
 -   The data set follows **F.A.I.R** and **C.A.R.E** principles.
 
-We ultimately landed on the *NCAA Regular Season Basketball Dataset* by Nate Duncan (Kaggle), due to its extremely high case to variable ratio (90902:40), the fact that the data set had many predictors that would practically contribute to the winning or losing of a team, and that it had included a winning and losing team, which is our testing parameter.
+We ultimately landed on the *NCAA Regular Season Basketball Dataset* by Nate Duncan [^1], due to its extremely high case to variable ratio (90902:40), the fact that the data set had many predictors that would practically contribute to the winning or losing of a team, and that it had included a winning and losing team, which is our testing parameter.
+
+[^1]: [@duncan2011]
 
 ### Ethical Considerations in the Choice of our Data Set
 
@@ -32,7 +40,7 @@ In order to ensure the ethical feasibility of the data set, we also scrutinized 
 
 Since we had obtained our data from the open-source data hub Kaggle, we can ensure that anyone can **find** and **access** this data set through Kaggle's use guidelines, stating for a free distribution of data sets that are published for public use to practice ML or data analysis on. The data is also highly versatile, taking a csv format. This is one of the most **interoperable** formats there are for data sets, especially for our use-case in R, where reading in a csv is already built into the base. Lastly, the data set can be **reused** for multiple types of data analysis, and will always remain relevant for its time period.
 
-In terms of **collective benefit**, the data set contributes to an overall understanding of basketball without harming any individuals or teams, due to the fact that it is simply raw data. Secondly, as I had stated the author's name, there is clearly ownership over the data set, showing proper **Authority to Control**. Since proper attributions are maintained, it also falls under the **Responsibility and Ethics** guidelines of the C.A.R.E principles.
+In terms of **collective benefit**, the data set contributes to an overall understanding of basketball without harming any individuals or teams, due to the fact that it is simply raw data. Secondly, as I had stated the author's name, there is clearly ownership over the data set coming from  sports-reference.com as Duncan mentioned, showing proper **Authority to Control**. Since proper attributions are maintained, it also falls under the **Responsibility and Ethics** guidelines of the C.A.R.E principles.
 
 ### Initial Cleaning
 
@@ -47,7 +55,7 @@ In order for use to perform data analysis, we must first do some cleaning to bet
 
 Particular motivations for 1-hot and binary encoding arose due to the fact that a lot of solutions to our proposed problems may require categorical variables to be represented numerically. Therefore, in order to capture categorical variables that may have a significant effect on our data we 1-hot encode them (the site variable in our case) capture the influence a particular portion of the model. Secondly, since win or loss can be represented in a binary format, we chose also mutate the game decision variable (categorical) into a numerical value as well (numerical). Lastly, you may notice that there are some variables that may not be able to be one-hot encoded, (such as team_name and date) because doing so would give our dataset hundreds of extra dimensions, making it infeasible to do any sort of calculations on.
 
-Based on the following information, we can perform the following operations to achieve a new, cleaned dataframe:
+Based on the following information, we can perform the following operations to achieve a new, cleaned dataframe, using tidyr api:
 
 ```{r}
 
@@ -121,11 +129,12 @@ write.csv(basketball_data, "Stat184ProjectTables/renamed_games.csv", row.names =
 
 By looking at the head, we can see that this model is much easier to interpret. The following gives us a little more information that we can use for our data analysis:
 
-# Aiden, include 1 table of means, SD, quantiles, of all of our variables of interest. Look at the NaiveModel code for examples.
 
 ### Initial Exploratory Data Analysis
 
-In order to build up on the notion of prediction, We are particularly interested in the metric of wins and losses, as this is generally the metric of greatest interest for every basketball team, every season. Therefore, our data focus will be around **wins and losses**, and the potential relationships every variable has on this metric. We can view a simple bar graph to see if there is an imbalance between wins and losses.
+ass Kosslyn had once mentioned in his book of *Graphic Design for the Eye and Mind*, "two properties must differ by a large enough proportion or they will not be distinguished."[^2] In order to build up on the notion of prediction we must therefore distinguish the difference margins of data. In particular, we are interested on how average statistics differ based on wins and losses. Winning or losing is generally the metric of greatest interest for every basketball team every season. Therefore, our data focus will be around **wins and losses**, and the potential relationships every variable has on this metric. We can therefore view a simple bar graph to see if there is an imbalance between wins and losses, and start to begin to explore trends in our data.
+
+[^2]: [@kosslyn2006]
 
 ```{r}
 library(dplyr)
@@ -188,7 +197,7 @@ ggplot(grouped_data, aes(x = Metric, y = Average, fill = Outcome)) +
 
 ```
 
-We can see here that there are clear differences in the averages of the teams that won and the averages of the teams that lost. Based on this difference, we can **infer** there might be some effect a higher or lower value of one of these variables can have, on the winrate of a game, respectively. We can see however, that based on the names, there might also be correlations between the variables. Let us model a scatterplot for the correlation between points and field
+We can see here that there are clear differences in the averages of the teams that won and the averages of the teams that lost. Based on this difference, we can **infer** there might be some effect a higher or lower value of one of these variables can have, on the win rate of a game, respectively. We can see however, that based on the names, there might also be correlations between the variables. Let us model a scatterplot for the correlation between points and field
 
 ```{r warning = FALSE,message=FALSE}
 library(dplyr)
@@ -276,9 +285,13 @@ ggplot(cor_data, aes(Var1, Var2, fill = Correlation)) +
   )
 ```
 
-The model depicts some weak correlation between all pairwise variables, with the diagonal signifying a variable's pairwise relationship with itself, which will obviously be 1. Since the heatmap has at least some weak correlation in all squares, it can therefore suggested that there are many relationships between multiple values of the dataset, since if multiple variables are pairwise dependent with multiple variables, then there may also be some colinearity in greater dimensions. However, this becomes much harder to visualize as we go up in dimensions. In order to continue interpreting the data, we need a new method to understand the data.
+The model depicts some weak correlation between all pairwise variables, with the diagonal signifying a variable's pairwise relationship with itself, which will obviously be 1. Since the heatmap has at least some weak correlation in all squares, it can therefore suggested that there are many relationships between multiple values of the dataset, since if multiple variables are pairwise dependent with multiple variables, then there may also be some colinearity in greater dimensions. However, this becomes much harder to visualize as we go up in dimensions. According to Tufte , "reasoning about evidence should not be stuck in 2 dimensions, for the world we seek to understand is profoundly multivariate."[^3] It is therefore crucial that we analyze many aspects of our statistical parameters to find objects of interest. In order to continue interpreting the data, we need a new method to understand the data.
 
-Given that these variables all have some sort of correlation with each other, curiosity drove us to the possibility of explaining these variables and their respective relationships with some sort of regression model. In explaining multiple variables with one regression function, while visualizations can remain difficult, the influences can be understood. Conveniently, there exists a method to be able to answer our original question of being able to predict a the binary outcome of a game's decision, effectively solving both propositions. After consulting Hyungsuk Tak, a professor of the Eberly College Statistics Department\![\^1\], we deduced that this can indeed be approached as a binary classification problem, where we can explore the data via **logistic regression** model as a means of predicting a win or loss, which will help us both explain relationships and predict if a team will win or lose based on their statistics.
+Given that these variables all have some sort of correlation with each other, curiosity drove us to the possibility of explaining these variables and their respective relationships with some sort of regression model. In explaining multiple variables with one regression function, while visualizations can remain difficult, the influences can be understood. Conveniently, there exists a method to be able to answer our original question of being able to predict a the binary outcome of a game's decision, effectively solving both propositions. After consulting Hyungsuk Tak, a professor of the Eberly College Statistics Department [^4], we deduced that this can indeed be approached as a binary classification problem, where we can explore the data via **logistic regression** model as a means of predicting a win or loss, which will help us both explain relationships and predict if a team will win or lose based on their statistics.
+
+
+[^3]: [@tufte2001]
+[^4]: [@tak2024]
 
 ### Introduction to Logistical Regression
 
@@ -504,10 +517,14 @@ ggplot(roc_data_combined, aes(x = 1 - specificity, y = sensitivity, color = Type
     legend.text = element_text(size = 10)
   )
 ```
+*We consulted the ggplot api to help us construct this graph. [^4]*
+
 
 Here we can see the baseline AUC in blue, specifying that a model would not do any better than randomly guessing the outcome, and so we get a curve that mimics the probability of our initial ratio of wins to losses is near .5. Meanwhile, marked in green is the perfect case, where a model's efficacy is perfect. We are aiming to achieve the green with our model.
 
 We can therefore construct our ROC curve and compute the AUC for our simple regression model to see if it does any better than random sampling (.52 AUC). We hand previously created a test set of 20% of our dataset, which we will use to compute the following.
+
+[^5]: [@ggplot2024]
 
 ```{r}
 library(ggplot2)
@@ -537,7 +554,7 @@ ggplot(random_roc_df, aes(x = FPR, y = TPR)) +
   annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(random_auc, 10)), size = 5, color = "blue")
 ```
 
-We can therefore infer that our model does improve our odds of predicting the binary classifier. **Keep in mind that this is not a measure of accuracy, rather it is a tool to be able to compare the efficacy some models with others.**
+We can therefore infer that our model does improve our odds of predicting the binary classifier. **Keep in mind that this is not a measure of accuracy, rather a tool to be able to compare the efficacy some models with others.**
 
 ### Naively Fitting all of our predictors of interest (Make improvements to the models)
 
@@ -706,7 +723,7 @@ It is important to note that logistic regression does not come without its downs
 
 ### Methods to obtain a more Parsimonious Model: BIC
 
-In order to achieve a more parsimonious model, we can employ a method known as BIC backwards elimination, where we penalize poorer fitting predictors that are highly multicolinear by a large amount. BIC then picks the greatest calculated values per predictor to eliminate, effectively expelling them from our model. In general, BIC is a more rigorous elimination method than AIC, since BIC makes use the log of the number of predictors multiplied with some penalty, where AIC uses a constant to perform the same metric. Theoretically, we can obtain a simpler model that performs just as well, if not better due to reduced overfitting, by shaving off these predictors via this method.
+In order to achieve a more parsimonious model, we can employ a method known as BIC backwards elimination, where we penalize poorer fitting predictors that are highly multicolinear by a large amount. BIC then picks the greatest calculated values per predictor to eliminate, effectively expelling them from our model. In general, BIC is a more rigorous elimination method than AIC, since BIC makes use the log of the number of predictors multiplied with some penalty, where AIC uses a constant to perform the same metric. Theoretically, we can obtain a simpler model that performs just as well, if not better due to reduced overfitting, by shaving off these "garbage" predictors via this method.
 
 ```{r, results = 'hide'}
 
@@ -802,7 +819,9 @@ We can see the difference between the AUC for the BIC model and our original mod
 
 ### Final Approach: Construction of a Neural Network
 
-In a final effort to push the bounds of prediction, we can construct a neural network in order to be able to predict a game win or loss. We will therefore trade simplicity for computing power, with the sole objective to compute accurate predictions. Based on the conventions commonly used in the construction of a classifier neural network, we follow an architecture that includes an actuation function to realize any sort of non-linearity, then plug our data into a sigmoid function (which is just a logistic regression layer) to receive our final output. After some careful and rigorous hyperparameter tuning, I have ended up with the following architecture:
+In a final effort to push the bounds of prediction, we can construct a neural network in order to be able to predict a game win or loss. We will therefore trade simplicity for computing power, with the sole objective to compute accurate predictions. Based on the conventions commonly used in the construction of a classifier neural network, we follow an architecture that includes an actuation function to realize any sort of non-linearity, then plug our data into a sigmoid function (which is just a logistic regression layer) to receive our final output. After some careful and rigorous hyperparameter tuning, I have ended up with the following architecture using h2o [^6].
+
+[^6]: [@h2o2024]
 
 ```{r}
 library(ggplot2)
@@ -884,6 +903,9 @@ ggplot() +
   )
 
 ```
+*If you are interested in hyperparameter tuning, here is a useful guide as to how to tune them with a fair amount of efficiency: [^7]*
+
+[^7]: [@jordan2024]
 
 Due to the black-box nature of neural networks, such tests that we have used previously have become almost impossible to implement, and by the graph above, we have demonstrated that understanding of the mechanisms of the neural network become increasingly obscure. Therefore, the sole purpose of this is to see if we can achieve a better prediction margin. We can therefore compare the Neural Network's AUC of the ROC against our other two models:
 
@@ -982,29 +1004,10 @@ Based on the convention of Ockham's Razor, we are ultimately able our most robus
 
 {{< pagebreak >}}
 
-# Bibliography
-
-# Jordan or Aiden, we need to include these as footnotes. Ctrl +f the document to find where I used these, and set up footnotes and bibliography.
-
-need to write bibliography. Here are our following sources, already cited correct.
-
--   Tak, Hyungsuk. "Professor of the Eberly College of Science, Pennsylvania State University."
-
--   H2O.ai. "Deep Learning — H2O 3.42.0.1 Documentation." H2O.ai, <https://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/deep-learning.html>. Accessed 15 Dec. 2024.
-
--   "ggplot2 Package Reference." Tidyverse, <https://ggplot2.tidyverse.org/reference/>. Accessed 15 Dec. 2024.
-
--   Jordan, Jeremy. "A Guide to Hyperparameter Tuning." Jeremy Jordan's Blog, <https://www.jeremyjordan.me/hyperparameter-tuning/>. Accessed 15 Dec. 2024.
-
--   Duncan, Nate. "2011 Current NCAA Basketball Games Dataset." Kaggle, <https://www.kaggle.com/datasets/nateduncan/2011current-ncaa-basketball-games>. Accessed 15 Dec. 2024.
-
--   Tufte, Edward R. *The Visual Display of Quantitative Information.* 2nd ed., Graphics Press, 2001.
-
--   Kosslyn, Stephen Michael. *Graph Design for the Eye and Mind.* Oxford University Press, 2006.
-
-{{< pagebreak >}}
-
 # Code Appendix
 
 ```{r codeAppend, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 ```
+
+{{< pagebreak >}}
+
