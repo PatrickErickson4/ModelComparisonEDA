@@ -1,5 +1,5 @@
 ---
-title: "Stat184Final"
+title: "Stat 184 Final"
 author: "Patrick Erickson, Aiden Shindel, Jordan Brophy"
 format: 
   pdf:
@@ -16,6 +16,7 @@ execute:
   warning: false
   message: false
 ---
+
 
 # Exploratory Predictive Data Analysis for Basketball Teams: Can we Create a Model to Predict if one Basketball Team will Win over Another?
 
@@ -127,12 +128,57 @@ write.csv(basketball_data, "Stat184ProjectTables/renamed_games.csv", row.names =
 
 ```
 
+
 By looking at the head, we can see that this model is much easier to interpret. The following gives us a little more information that we can use for our data analysis:
 
 
 ### Initial Exploratory Data Analysis
 
-ass Kosslyn had once mentioned in his book of *Graphic Design for the Eye and Mind*, "two properties must differ by a large enough proportion or they will not be distinguished."[^2] In order to build up on the notion of prediction we must therefore distinguish the difference margins of data. In particular, we are interested on how average statistics differ based on wins and losses. Winning or losing is generally the metric of greatest interest for every basketball team every season. Therefore, our data focus will be around **wins and losses**, and the potential relationships every variable has on this metric. We can therefore view a simple bar graph to see if there is an imbalance between wins and losses, and start to begin to explore trends in our data.
+Let us first look at some of the average statistics for our model to help us better understand our data:
+
+```{r}
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+data <- read.csv("Stat184ProjectTables/fullmodel.csv")
+data <- data %>%
+  select(-game_decision,-Home,-Away,-Neutral)
+
+
+stats_list <- lapply(data, function(x) {
+  c(
+    Min = min(x, na.rm = TRUE),
+    `25%-tile` = quantile(x, 0.25, na.rm = TRUE),
+    Median = median(x, na.rm = TRUE),
+    `75%-tile` = quantile(x, 0.75, na.rm = TRUE),
+    Max = max(x, na.rm = TRUE),
+    mean = mean(x, na.rm = TRUE)     
+  )
+})
+
+summary_stats <- as.data.frame(do.call(rbind, stats_list))
+summary_stats <- cbind(`Game Statistic` = rownames(summary_stats), summary_stats)
+rownames(summary_stats) <- NULL
+p <- summary_stats %>%
+  kable(
+    digits = 2,
+    col.names = c("Game Statistic", "Min", "25%-tile", "Median",
+                  "75%-tile", "Max", "mean"),
+    format.args = list(big.mark = ","),
+    align = "lcccccccccc"
+  ) %>%
+  kable_classic() %>%
+  add_footnote(
+    notation = "none",
+    threeparttable = TRUE
+  )
+p
+```
+
+Based on the following, we can see that there is a lot of variability within the dataset. In particular, we want to explore the mean further and see if we can obtain any sort of relationships from the data.
+
+As Kosslyn had stated in his book of *Graphic Design for the Eye and Mind*, "two properties must differ by a large enough proportion or they will not be distinguished."[^2] In order to build up on the notion of prediction we must therefore distinguish the difference margins of data. In particular, we are interested on how average statistics differ based on wins and losses. Winning or losing is generally the metric of greatest interest for every basketball team every season. Therefore, our data focus will be around **wins and losses**, and the potential relationships every variable has on this metric. We can therefore view a simple bar graph to see if there is an imbalance between wins and losses, and start to begin to explore trends in our data.
 
 [^2]: [@kosslyn2006]
 
