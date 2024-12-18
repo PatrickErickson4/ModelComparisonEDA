@@ -38,11 +38,11 @@ We ultimately landed on the *NCAA Regular Season Basketball Dataset* by Nate Dun
 
 ### Ethical Considerations in the Choice of our Data Set
 
-In order to ensure the ethical feasibility of the data set, we also scrutinized our selection to follow the **F.A.I.R** and **C.A.R.E** principles as discussed in class.
+In order to ensure the ethical feasibility of the data set, we also scrutinized our selection to follow the **F.A.I.R.** and **C.A.R.E.** principles as discussed in class.
 
 Since we had obtained our data from the open-source data hub Kaggle, we can ensure that anyone can **find** and **access** this data set through Kaggle's use guidelines, stating for a free distribution of data sets that are published for public use to practice ML or data analysis on. The data is also highly versatile, taking a csv format. This is one of the most **interoperable** formats there are for data sets, especially for our use-case in R, where reading in a csv is already built into the base. Lastly, the data set can be **reused** for multiple types of data analysis, and will always remain relevant for its time period.
 
-In terms of **collective benefit**, the data set contributes to an overall understanding of basketball without harming any individuals or teams, due to the fact that it is simply raw data. Secondly, as I had stated the author's name, there is clearly ownership over the data set coming from  sports-reference.com as Duncan mentioned, showing proper **Authority to Control**. Since proper attributions are maintained, it also falls under the **Responsibility and Ethics** guidelines of the C.A.R.E principles.
+In terms of **collective benefit**, the data set contributes to an overall understanding of basketball without harming any individuals or teams, due to the fact that it is simply raw data. Secondly, as I had stated the author's name, there is clearly ownership over the data set coming from  sports-reference.com as Duncan mentioned, showing proper **Authority to Control**. Since proper attributions are maintained, it also falls under the **Responsibility and Ethics** guidelines of the C.A.R.E. principles.
 
 ### Initial Cleaning
 
