@@ -15,6 +15,7 @@ execute:
   echo: false
   warning: false
   message: false
+  cache: true
 ---
 
 
@@ -29,7 +30,7 @@ In basketball, a number of statistics can be used in order to predict the winner
 -   The data set must be large to be able to get a good testing pool.
 -   The data set has meaningful predictors are practically relevant to our test case.
 -   The data set contains a winning/losing team variable
--   The data set follows **F.A.I.R** and **C.A.R.E** principles.
+-   The data set follows **F.A.I.R.** and **C.A.R.E.** principles.
 
 We ultimately landed on the *NCAA Regular Season Basketball Dataset* by Nate Duncan [^1], due to its extremely high case to variable ratio (90902:40), the fact that the data set had many predictors that would practically contribute to the winning or losing of a team, and that it had included a winning and losing team, which is our testing parameter.
 
@@ -373,7 +374,7 @@ train_index <- sample(1:nrow(fullmodel), 0.8 * nrow(fullmodel))
 trainingset <- fullmodel[train_index, ]  # 80% training data
 
 #Create and SAVE test and training sets, as well as the full model for some comaparisons in the future
-testset <- fullmodel[-train_index, ] #20%
+testset <- fullmodel[-train_index, ] # 20%
 write.csv(fullmodel, "Stat184ProjectTables/fullmodel.csv", row.names = FALSE)
 write.csv(trainingset,"Stat184ProjectTables/trainingset.csv",row.names = FALSE)
 write.csv(testset,"Stat184ProjectTables/testset.csv",row.names = FALSE)
@@ -426,7 +427,7 @@ This graph essentially shows what happens for every unit increase in points. Not
 
 Despite the fact that our logistic regression model can produce some prediction of our binary outcome, it may turn out that the predictor used to construct the model might be completely garbage. In other words, it could either have too weak of a relationship with the binary outcome (game decision), meaning the overall power of this predictor might not be statistically significant. Luckily, Base R's logistic regression models allow us to extract the Null and Residual Deviances ($D_N$ and $D_R$ for our use case), which can be used as a metric to perform a goodness of fit test. The differences in their degrees of freedom $df$ follows a $\chi^2_{df}$ distribution, or more intuitively the number of predictors within our model (1). We can therefore construct the following hypothesis test to test for model significance: $$H_0: \beta_1 = 0$$ $$H_1: \beta_1 \neq 0$$
 
-Based on the following distribution, we will plot both the p-value and the distribution to either reject or fail to reject our null hypothesis:
+Based on the following distribution, we will plot both the p-value and the distribution to either reject or fail to reject our null hypothesis: 
 
 ```{r}
 
@@ -463,9 +464,9 @@ ggplot(chi_sq_data, aes(x = x, y = density)) +
   ) +
   annotate(
     "text",
-    x = 10,
+    x = 9,
     y = .5,  # Adjust label height
-    label = paste("Chi-sq =", round(residual_deviance, 2), "\np =", signif(p_value, 3)),
+    label = paste("Chi-sq =", round(residual_deviance, 2), "\np is roughly", signif(p_value, 3)),
     color = "red",
     hjust = 0.5
   ) +
@@ -541,7 +542,7 @@ ggplot(roc_data_combined, aes(x = 1 - specificity, y = sensitivity, color = Type
   ) +
   annotate(
     "text",
-    x = 0.5, y = 0.2, 
+    x = 0.38, y = 0.2, 
     label = paste("Random AUC =", round(.489, 3)), 
     color = "red", 
     size = 5, 
@@ -563,7 +564,7 @@ ggplot(roc_data_combined, aes(x = 1 - specificity, y = sensitivity, color = Type
     legend.text = element_text(size = 10)
   )
 ```
-*We consulted the ggplot api to help us construct this graph. [^4]*
+*We consulted the ggplot api to help us construct this graph. [^5]*
 
 
 Here we can see the baseline AUC in blue, specifying that a model would not do any better than randomly guessing the outcome, and so we get a curve that mimics the probability of our initial ratio of wins to losses is near .5. Meanwhile, marked in green is the perfect case, where a model's efficacy is perfect. We are aiming to achieve the green with our model.
@@ -706,7 +707,7 @@ ggplot(chi_sq_data, aes(x = x, y = density)) +
     "text",
     x = 45,
     y = 0.01,  # Adjust label height
-    label = paste("Chi-sq =", round(chisq_stat, 2), "\np =", signif(p_value, 3)),
+    label = paste("Chi-sq =", round(chisq_stat, 2), "\np is roughly", signif(p_value, 3)),
     color = "red",
     hjust = 0.5
   ) +
@@ -756,12 +757,12 @@ roc_plot_naivemodel <- ggplot(naivemodel_roc_df, aes(x = FPR, y = TPR)) +
     y = "True Positive Rate (Sensitivity)"
   ) +
   theme_minimal() +
-  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(naivemodel_auc, 10)), size = 5, color = "blue")
+  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(naivemodel_auc, 5)), size = 5, color = "blue")
 
 roc_plot_naivemodel
 ```
 
-We can see that our model now performs significantly better than our initial model, with a new AUC of .9514
+We can see that our model now performs significantly better than our initial model, with a new AUC of .9514.
 
 ### High Multicolinearity and Fallibilities of Logistic Regression
 
@@ -814,7 +815,7 @@ ggplot(chi_sq_data, aes(x = x, y = density)) +
     "text",
     x = 35,
     y = 0.01,  # Adjust label height
-    label = paste("Chi-sq =", round(chisq_stat, 2), "\np =", signif(p_value, 3)),
+    label = paste("Chi-sq =", round(chisq_stat, 2), "\np is roughly", signif(p_value, 3)),
     color = "red",
     hjust = 0.5
   ) +
@@ -857,7 +858,7 @@ roc_plot_parsimonious <- ggplot(parsimonious_roc_df, aes(x = FPR, y = TPR)) +
     y = "True Positive Rate (Sensitivity)"
   ) +
   theme_minimal() +
-  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(parsimonious_auc, 10)), size = 5, color = "red")
+  annotate("text", x = 0.7, y = 0.1, label = paste("AUC =", round(parsimonious_auc, 5)), size = 5, color = "red")
 roc_plot_parsimonious
 ```
 
@@ -1022,7 +1023,7 @@ nn_plot <- ggplot(nn_roc_df, aes(x = FPR, y = TPR)) +
   theme_minimal() +
   annotate(
     "text", x = 0.7, y = 0.2,
-    label = paste("AUC =", round(nn_auc, 10)),
+    label = paste("AUC =", round(nn_auc, 5)),
     size = 5, color = "blue"
   )
 
@@ -1050,10 +1051,15 @@ Based on the convention of Ockham's Razor, we are ultimately able our most robus
 
 {{< pagebreak >}}
 
+# References
+
+:::{#refs}
+:::
+
+{{< pagebreak >}}
+
 # Code Appendix
 
 ```{r codeAppend, ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 ```
-
-{{< pagebreak >}}
 
