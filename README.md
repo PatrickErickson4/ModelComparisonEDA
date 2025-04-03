@@ -1,6 +1,6 @@
 # ModelComparisonEDA
 ---
-This is a forked copy of my initial project with Aiden Shindel and Jordan Brophy. This original readme is below.
+This is a forked copy of my initial project with Aiden Shindel and Jordan Brophy. A Comprehensive Report was generated via Quarto. Please see the attached pdf file. This original readme is below.
 
 # Stat 184 Final Project--Fall 2024
 
